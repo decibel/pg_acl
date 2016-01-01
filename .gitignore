@@ -1,0 +1,20 @@
+# Editor files
+.*.swp
+
+# Compiler output
+*.o
+*.so
+.deps/
+
+# built targets
+/sql/*--*
+!/sql/*--*--*.sql
+
+# Test artifacts
+results/
+regression.diffs
+regression.out
+
+# Misc
+tmp/
+.DS_Store
