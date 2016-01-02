@@ -1,6 +1,6 @@
 \set ECHO none
 
-\i pgxntool/setup.sql
+\i test/pgxntool/setup.sql
 
 
 SELECT throws_like(
