@@ -20,8 +20,8 @@ META_extversion	= $(call META_parse,provides$(json_sep)$(1)$(json_sep)version)
 PGXNTOOL_DIR := pgxntool
 JSON_SH := $(PGXNTOOL_DIR)/JSON.sh
 
-PGXN		:= $(call META_parse,name)
-PGXNVERSION	:= $(call META_parse,version)
+PGXN		= $(call META_parse,name)
+PGXNVERSION	= $(call META_parse,version)
 
 # Get list of all extensions defined in META.json
 # The second argument first expands to 'provides","[^"]*', which after
@@ -30,7 +30,7 @@ PGXNVERSION	:= $(call META_parse,version)
 #
 # This ultimately has the effect of finding every key name under the provides
 # object in META.json.
-EXTENSIONS	:= $(call META_parse2,provides$(json_sep)[^$(dquote)]*,-d\$(dquote) -f4)
+EXTENSIONS	= $(call META_parse2,provides$(json_sep)[^$(dquote)]*,-d\$(dquote) -f4)
 
 define extension--version_rule
 EXTENSION_$(1)_VERSION		:= $(call META_extversion,$(1))
@@ -39,7 +39,8 @@ EXTENSION_VERSION_FILES		+= $$(EXTENSION_$(1)_VERSION_FILE)
 $$(EXTENSION_$(1)_VERSION_FILE): sql/$(1).sql META.json
 	cp $$< $$@
 endef
-$(foreach ext,$(EXTENSIONS),$(eval $(call extension--version_rule,$(ext))))
+$(foreach ext,$(EXTENSIONS),$(eval $(call extension--version_rule,$(ext)))): META.json
+# TODO: Add support for creating .control files
 #$(foreach ext,$(EXTENSIONS),$(info $(call extension--version_rule,$(ext))))
 
 DATA         = $(filter-out $(wildcard sql/*-*-*.sql),$(wildcard sql/*.sql))
@@ -82,6 +83,14 @@ DATA += $(wildcard *.control)
 # Don't have installcheck bomb on error
 .IGNORE: installcheck
 
+#
+# META.json
+#
+all: META.json
+META.json: META.in.json pgxntool/build_meta.sh
+	pgxntool/build_meta.sh $< $@
+distclean:
+	rm -f META.json
 #
 # pgtap
 #
@@ -126,6 +135,13 @@ dist-only:
 
 .PHONY: forcedist
 forcedist: forcetag dist
+
+# Target to list all targets
+# http://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile
+.PHONY: no_targets__ list
+no_targets__:
+list:
+	sh -c "$(MAKE) -p no_targets__ | awk -F':' '/^[a-zA-Z0-9][^\$$#\/\\t=]*:([^=]|$$)/ {split(\$$1,A,/ /);for(i in A)print A[i]}' | grep -v '__\$$' | sort"
 
 # To use this, do make print-VARIABLE_NAME
 print-%	: ; $(info $* is $(flavor ${$*}) variable set to [${$*}])@echo -n
