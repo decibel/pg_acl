@@ -91,17 +91,6 @@ META.json: META.in.json pgxntool/build_meta.sh
 	pgxntool/build_meta.sh $< $@
 distclean:
 	rm -f META.json
-<<<<<<< HEAD
-#
-# pgtap
-#
-.PHONY: pgtap
-pgtap: $(DESTDIR)$(datadir)/extension/pgtap.control
-
-$(DESTDIR)$(datadir)/extension/pgtap.control:
-	pgxn install pgtap
-=======
->>>>>>> test
 
 #
 # testdeps
