@@ -48,6 +48,8 @@ SELECT function_returns(
   , 'acl_right_no_grant[]'
 );
 
+SELECT * FROM finish();
+
 \echo TRANSACTION INTENTIONALLY LEFT OPEN!
 
 -- vi: expandtab sw=2 ts=2

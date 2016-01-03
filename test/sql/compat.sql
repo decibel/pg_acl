@@ -13,6 +13,7 @@ SELECT throws_like(
   , 'Ensure _aclitems_all_rights() is correct.'
 );
 
+SELECT * FROM finish();
 
 \echo TRANSACTION INTENTIONALLY LEFT OPEN!
 
