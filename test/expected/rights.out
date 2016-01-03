@@ -1,0 +1,9 @@
+\set ECHO none
+1..6
+ok 1 - _aclitems_all_rights is 2x longer than without.
+ok 2 - _aclitems_all_rights with *s removed matches without grants
+ok 3 - rights_to_enum_no_grant() output correct
+ok 4 - rights_to_enum() output correct
+ok 5 - Function rights_to_enum_no_grant(text) should return acl_right_no_grant[]
+ok 6 - Function rights_to_enum_no_grant(text) should return acl_right_no_grant[]
+TRANSACTION INTENTIONALLY LEFT OPEN!

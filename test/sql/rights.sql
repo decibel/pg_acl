@@ -17,7 +17,7 @@ SELECT is(
 );
 SELECT is(
   replace(_aclitems_all_rights(), '*', '')
-  , _aclitems_all_rights_no_grant())
+  , _aclitems_all_rights_no_grant()
   , '_aclitems_all_rights with *s removed matches without grants'
 );
 
@@ -25,12 +25,13 @@ SELECT is(
 -- Function output
 SELECT is(
   rights_to_enum_no_grant(_aclitems_all_rights_no_grant())
-  , _all_acl_right_no_grant()
+  , _all__acl_right_no_grant()
   , 'rights_to_enum_no_grant() output correct'
 );
+-- ASSUMPTION: rights_to_enum_no_grant() internally calls rights_to_enum(...,true)
 SELECT is(
   rights_to_enum(_aclitems_all_rights())
-  , _all_acl_right()
+  , array(SELECT * FROM unnest(_all__acl_right()) r WHERE r::text LIKE '% WITH GRANT OPTION')
   , 'rights_to_enum() output correct'
 );
 
@@ -39,12 +40,12 @@ SELECT is(
 SELECT function_returns(
   'rights_to_enum_no_grant'::name
   , '{text}'::text[]
-  , 'acl_right_no_grant'
+  , 'acl_right_no_grant[]'
 );
 SELECT function_returns(
-  'rights_to_enum'::name
+  'rights_to_enum_no_grant'::name
   , '{text}'::text[]
-  , 'acl_right'
+  , 'acl_right_no_grant[]'
 );
 
 \echo TRANSACTION INTENTIONALLY LEFT OPEN!
