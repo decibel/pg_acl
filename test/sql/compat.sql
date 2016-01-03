@@ -8,8 +8,8 @@ SET search_path=public,tap;
 SELECT plan(1);
 
 SELECT throws_like(
-  $$SELECT '=!@#$%^&&*()'::aclitem'$$
-  , format( '% must be one of ""', _aclitems_all_rights() )
+  $$SELECT '=abcdefghijklmnopqrstuvwxyz'::aclitem$$
+  , format( '%% must be one of "%s"', _aclitems_all_rights_no_grant() )
   , 'Ensure _aclitems_all_rights() is correct.'
 );
 
