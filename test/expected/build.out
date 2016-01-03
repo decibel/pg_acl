@@ -1,0 +1,12 @@
+\set ECHO none
+ _enum_from_array 
+------------------
+ 
+(1 row)
+
+ _enum_from_array 
+------------------
+ 
+(1 row)
+
+TRANSACTION INTENTIONALLY LEFT OPEN!
