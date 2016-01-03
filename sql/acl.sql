@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION _enum_from_array(
   enum_name text
   , enum_values text[]
   , comment text DEFAULT NULL
-) RETURNS void LANGUAGE plpgsql AS $body$
+) RETURNS void LANGUAGE plpgsql AS $_enum_from_array$
 DECLARE
   c_quoted_values text[] := array(
     SELECT quote_literal(unnest) FROM unnest(enum_values)
@@ -34,7 +34,7 @@ BEGIN
   -- TODO: Get schema for newly created enum so stuff below won't poop
   IF comment IS NOT NULL THEN
     sql := format(
-      'COMMENT ON ENUM %I IS %L'
+      'COMMENT ON TYPE %I IS %L'
       , enum_name
       , comment
     );
@@ -45,13 +45,13 @@ BEGIN
   /*
    * Create functions that return all the enum values.
    */
-  array_function_name = '_all_' || enum_name;
+  array_function_name = '_all__' || enum_name;
   sql := format(
-$format$CREATE OR REPLACE FUNCTION %I(
-) RETURNS %I[] LANGUAGE sql IMMUTABLE AS $body$
-SELECT enum_range(NULL::%1$I)
+$format$CREATE OR REPLACE FUNCTION %1$I(
+) RETURNS %2$I[] LANGUAGE sql IMMUTABLE AS $body$
+SELECT enum_range(NULL::%2$I)
 $body$;
-COMMENT ON FUNCTION %I() IS %L;
+COMMENT ON FUNCTION %1$I() IS %L;
 $format$
     , array_function_name
     , enum_name
@@ -61,11 +61,11 @@ $format$
   EXECUTE sql;
 
   sql := format(
-$format$CREATE OR REPLACE FUNCTION %I(
-) RETURNS SETOF %I LANGUAGE sql IMMUTABLE AS $body$
-SELECT * FROM unnest(%2I())
+$format$CREATE OR REPLACE FUNCTION %1$I(
+) RETURNS SETOF %2$I LANGUAGE sql IMMUTABLE AS $body$
+SELECT * FROM unnest(%3$I())
 $body$;
-COMMENT ON FUNCTION %I() IS %L;
+COMMENT ON FUNCTION %1$I() IS %4$L;
 $format$
     , array_function_name || '_srf'
     , enum_name
@@ -76,7 +76,7 @@ $format$
   EXECUTE sql;
 
 END
-$body$;
+$_enum_from_array$;
 COMMENT ON FUNCTION _enum_from_array(text,text[],text) IS $$Utility function for creating an enum from an array of values.$$;
 
 -- Create no-grant enum first
@@ -103,12 +103,15 @@ SELECT _enum_from_array(
 SELECT _enum_from_array(
   'acl_right'
   , array(
-      SELECT r::text FROM _all_rights_no_grant_srf() r
+      SELECT r::text FROM _all__acl_right_no_grant_srf() r
       UNION ALL
-      SELECT r || ' WITH GRANT OPTION' FROM _all_rights_no_grant_srf() r
+      SELECT r || ' WITH GRANT OPTION' FROM _all__acl_right_no_grant_srf() r
     )
-  , $$Rights that an ACL item can have.$$;
+  , $$Rights that an ACL item can have.$$
 );
+
+CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT AS ASSIGNMENT;
+CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT AS ASSIGNMENT;
 
 CREATE OR REPLACE FUNCTION rights_to_enum(
   input text
@@ -188,7 +191,7 @@ COMMENT ON FUNCTION rights_to_enum(
 CREATE OR REPLACE FUNCTION rights_to_enum_no_grant(
   input text
 ) RETURNS acl_right_no_grant[] LANGUAGE sql IMMUTABLE AS $body$
-SELECT rights_to_enum(input, true)
+SELECT rights_to_enum(input, true)::acl_right_no_grant[]
 $body$;
 
 -- vi: expandtab ts=2 sw=2
