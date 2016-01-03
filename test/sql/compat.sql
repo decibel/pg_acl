@@ -2,6 +2,10 @@
 
 \i test/pgxntool/setup.sql
 
+-- TODO: remove
+SET search_path=public,tap;
+
+SELECT plan(1);
 
 SELECT throws_like(
   $$SELECT '=!@#$%^&&*()'::aclitem'$$

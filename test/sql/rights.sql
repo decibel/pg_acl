@@ -2,6 +2,9 @@
 
 \i test/pgxntool/setup.sql
 
+-- TODO: remove
+SET search_path=public,tap;
+
 -- NOTE: the compat.sql test verifies that we've got the full set of rights
 
 -- Sanity-check with grant version
