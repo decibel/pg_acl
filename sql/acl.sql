@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION _aclitems_all_rights_no_grant(
 ) RETURNS text LANGUAGE sql IMMUTABLE AS $body$
 SELECT 'arwdDxtXUCTc'::text;
 $body$;
-CREATE OR REPLACE FUNCTION _aclitems_all_rights(
+CREATE OR REPLACE FUNCTION _aclitems_all_rights_w_grant(
 ) RETURNS text LANGUAGE sql IMMUTABLE AS $body$
 SELECT array_to_string(
     regexp_split_to_array( _aclitems_all_rights_no_grant(), '' )
@@ -110,6 +110,14 @@ SELECT _enum_from_array(
   , $$Rights that an ACL item can have.$$
 );
 
+-- Only GRANT version of rights
+CREATE FUNCTION _all__acl_right_only_grant(
+) RETURNS acl_right[] LANGUAGE sql IMMUTABLE AS $body$
+SELECT array(
+  SELECT * FROM _all__acl_right_srf() r WHERE r::text LIKE '% WITH GRANT OPTION'
+)
+$body$;
+
 CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT AS ASSIGNMENT;
 CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT AS ASSIGNMENT;
 
@@ -193,5 +201,51 @@ CREATE OR REPLACE FUNCTION rights_to_enum_no_grant(
 ) RETURNS acl_right_no_grant[] LANGUAGE sql IMMUTABLE AS $body$
 SELECT rights_to_enum(input, true)::acl_right_no_grant[]
 $body$;
+
+
+CREATE TYPE acl AS (
+  grantee regrole
+  , rights acl_right[]
+  , grantor regrole
+);
+
+CREATE OR REPLACE FUNCTION acl(
+  input aclitem
+) RETURNS acl LANGUAGE plpgsql
+STABLE -- regrole is only stable
+AS $body$
+DECLARE
+  c_equal CONSTANT text[] := string_to_array( input::text, '=' );
+  c_slash CONSTANT text[] := string_to_array( c_equal[2], '/' );
+
+  o acl;
+BEGIN
+  IF array_length(c_equal, 1) > 2 THEN
+    RAISE 'parsing roles that contain equals ("=") is not supported'
+    USING
+      hint='If you need support for this please open an issue at https://github.com/decibel/pg_acl/issues!'
+    ;
+  END IF;
+  IF array_length(c_slash, 1) > 2 THEN
+    RAISE 'parsing roles that contain slash ("/") is not supported'
+    USING
+      hint='If you need support for this please open an issue at https://github.com/decibel/pg_acl/issues!'
+    ;
+  END IF;
+
+  o.grantee = nullif(c_equal[1], '');
+  o.grantor = nullif(c_slash[2], '');
+  o.rights = rights_to_enum(c_slash[1]);
+  RETURN o;
+END
+$body$;
+CREATE OR REPLACE FUNCTION acl(
+  input aclitem[]
+) RETURNS acl[] LANGUAGE sql STABLE AS $body$
+SELECT array(
+  SELECT acl(u) FROM unnest(input) u
+)
+$body$;
+
 
 -- vi: expandtab ts=2 sw=2
