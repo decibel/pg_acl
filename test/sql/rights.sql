@@ -55,6 +55,6 @@ SELECT function_returns(
 
 SELECT * FROM finish();
 
-\echo TRANSACTION INTENTIONALLY LEFT OPEN!
+\echo # TRANSACTION INTENTIONALLY LEFT OPEN!
 
 -- vi: expandtab sw=2 ts=2
