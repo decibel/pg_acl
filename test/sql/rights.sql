@@ -41,25 +41,25 @@ SELECT results_eq(
 
 -- Function output
 SELECT is(
-  rights_to_enum_no_grant(_aclitems_all_rights_no_grant())
+  _rights_to_enum_no_grant(_aclitems_all_rights_no_grant())
   , _all__acl_right_no_grant()
-  , 'rights_to_enum_no_grant() output correct'
+  , '_rights_to_enum_no_grant() output correct'
 );
--- ASSUMPTION: rights_to_enum_no_grant() internally calls rights_to_enum(...,true)
+-- ASSUMPTION: _rights_to_enum_no_grant() internally calls _rights_to_enum(...,true)
 SELECT is(
-  rights_to_enum(_aclitems_all_rights_w_grant())
+  _rights_to_enum(_aclitems_all_rights_w_grant())
   , _all__acl_right_only_grant()
-  , 'rights_to_enum() output correct'
+  , '_rights_to_enum() output correct'
 );
 
 -- Function return types should be different
 SELECT function_returns(
-  'rights_to_enum_no_grant'::name
+  '_rights_to_enum_no_grant'::name
   , '{text}'::text[]
   , 'acl_right_no_grant[]'
 );
 SELECT function_returns(
-  'rights_to_enum_no_grant'::name
+  '_rights_to_enum_no_grant'::name
   , '{text}'::text[]
   , 'acl_right_no_grant[]'
 );

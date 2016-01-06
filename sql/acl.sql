@@ -126,7 +126,7 @@ $body$;
 CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT;
 CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT;
 
-CREATE OR REPLACE FUNCTION rights_to_enum(
+CREATE OR REPLACE FUNCTION _rights_to_enum(
   input text
   , no_grant boolean DEFAULT false
 ) RETURNS acl_right[] LANGUAGE plpgsql IMMUTABLE AS $body$
@@ -196,15 +196,15 @@ SELECT format(
   RETURN out;
 END
 $body$;
-COMMENT ON FUNCTION rights_to_enum(
+COMMENT ON FUNCTION _rights_to_enum(
   input text
   , no_grant boolean
 ) IS $$Parse the rights portion of an aclitem. If no_grant is true then grant options will be ignored.$$;
 
-CREATE OR REPLACE FUNCTION rights_to_enum_no_grant(
+CREATE OR REPLACE FUNCTION _rights_to_enum_no_grant(
   input text
 ) RETURNS acl_right_no_grant[] LANGUAGE sql IMMUTABLE AS $body$
-SELECT rights_to_enum(input, true)::acl_right_no_grant[]
+SELECT _rights_to_enum(input, true)::acl_right_no_grant[]
 $body$;
 
 
@@ -240,7 +240,7 @@ BEGIN
 
   o.grantee = nullif(c_equal[1], '');
   o.grantor = nullif(c_slash[2], '');
-  o.rights = rights_to_enum(c_slash[1]);
+  o.rights = _rights_to_enum(c_slash[1]);
   RETURN o;
 END
 $body$;

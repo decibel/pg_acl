@@ -5,10 +5,10 @@ ok 2 - _aclitems_all_rights_w_grant with *s removed matches without grants
 ok 3 - Verify all values are in _all__acl_right()
 ok 4 - Verify proper ordering of rights without grant
 ok 5 - Verify proper ordering of rights with grant
-ok 6 - rights_to_enum_no_grant() output correct
-ok 7 - rights_to_enum() output correct
-ok 8 - Function rights_to_enum_no_grant(text) should return acl_right_no_grant[]
-ok 9 - Function rights_to_enum_no_grant(text) should return acl_right_no_grant[]
+ok 6 - _rights_to_enum_no_grant() output correct
+ok 7 - _rights_to_enum() output correct
+ok 8 - Function _rights_to_enum_no_grant(text) should return acl_right_no_grant[]
+ok 9 - Function _rights_to_enum_no_grant(text) should return acl_right_no_grant[]
 ok 10 - Cast (acl_right AS acl_right_no_grant) should exist
 ok 11 - Cast (acl_right_no_grant AS acl_right) should exist
 # TRANSACTION INTENTIONALLY LEFT OPEN!
