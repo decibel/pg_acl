@@ -53,6 +53,17 @@ SELECT function_returns(
   , 'acl_right_no_grant[]'
 );
 
+
+-- Casts exist
+SELECT has_cast(
+  'acl_right'
+  , 'acl_right_no_grant'
+);
+SELECT has_cast(
+  'acl_right_no_grant'
+  , 'acl_right'
+);
+
 SELECT * FROM finish();
 
 \echo # TRANSACTION INTENTIONALLY LEFT OPEN!
