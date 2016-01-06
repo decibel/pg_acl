@@ -16,7 +16,7 @@ SELECT is(
   , '_aclitems_all_rights_w_grant is 2x longer than without.'
 );
 SELECT is(
-  replace(_aclitems_all_rights_w_grant(), '*', '')
+  _aclitems_all_rights_no_grant()
   , _aclitems_all_rights_no_grant()
   , '_aclitems_all_rights_w_grant with *s removed matches without grants'
 );
