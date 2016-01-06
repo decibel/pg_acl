@@ -6,7 +6,7 @@
 SET search_path=public,tap;
 
 
-SELECT plan(7);
+SELECT plan( 5 + 2 + 2 + 2 );
 
 -- NOTE: the compat.sql test verifies that we've got the full set of rights
 -- Sanity-check with grant version
@@ -21,10 +21,21 @@ SELECT is(
   , '_aclitems_all_rights_w_grant with *s removed matches without grants'
 );
 
-SELECT is(
-  _all__acl_right()
-  , _all__acl_right_no_grant()::acl_right[] || _all__acl_right_only_grant()
+SELECT bag_eq(
+  $$SELECT * FROM _all__acl_right_srf()$$
+  , $$SELECT r::acl_right FROM _all__acl_right_no_grant_srf() r UNION ALL SELECT * FROM _all__acl_right_only_grant_srf()$$
   , 'Verify all values are in _all__acl_right()'
+);
+
+SELECT results_eq(
+  $$SELECT r FROM _all__acl_right_srf() WITH ORDINALITY r WHERE ordinality % 2 = 1$$
+  , $$SELECT r::acl_right FROM _all__acl_right_no_grant_srf() r$$
+  , 'Verify proper ordering of rights without grant'
+);
+SELECT results_eq(
+  $$SELECT r FROM _all__acl_right_srf() WITH ORDINALITY r WHERE ordinality % 2 = 0$$
+  , $$SELECT * FROM _all__acl_right_only_grant_srf()$$
+  , 'Verify proper ordering of rights with grant'
 );
 
 

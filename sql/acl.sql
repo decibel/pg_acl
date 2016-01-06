@@ -103,19 +103,24 @@ SELECT _enum_from_array(
 SELECT _enum_from_array(
   'acl_right'
   , array(
-      SELECT r::text FROM _all__acl_right_no_grant_srf() r
-      UNION ALL
-      SELECT r || ' WITH GRANT OPTION' FROM _all__acl_right_no_grant_srf() r
+      SELECT r FROM (
+        SELECT r::text, ordinality FROM _all__acl_right_no_grant_srf() WITH ORDINALITY r
+        UNION ALL
+        SELECT r || ' WITH GRANT OPTION', ordinality FROM _all__acl_right_no_grant_srf() WITH ORDINALITY r
+      ) a
+      ORDER BY ordinality, r
     )
   , $$Rights that an ACL item can have.$$
 );
 
 -- Only GRANT version of rights
+CREATE FUNCTION _all__acl_right_only_grant_srf(
+) RETURNS SETOF acl_right LANGUAGE sql IMMUTABLE AS $body$
+SELECT * FROM _all__acl_right_srf() r WHERE r::text LIKE '% WITH GRANT OPTION'
+$body$;
 CREATE FUNCTION _all__acl_right_only_grant(
 ) RETURNS acl_right[] LANGUAGE sql IMMUTABLE AS $body$
-SELECT array(
-  SELECT * FROM _all__acl_right_srf() r WHERE r::text LIKE '% WITH GRANT OPTION'
-)
+SELECT array( SELECT * FROM _all__acl_right_only_grant_srf() )
 $body$;
 
 CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT;
