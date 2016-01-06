@@ -118,8 +118,8 @@ SELECT array(
 )
 $body$;
 
-CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT AS ASSIGNMENT;
-CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT AS ASSIGNMENT;
+CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT;
+CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT;
 
 CREATE OR REPLACE FUNCTION rights_to_enum(
   input text
