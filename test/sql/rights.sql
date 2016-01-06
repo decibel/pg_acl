@@ -5,10 +5,10 @@
 -- TODO: remove
 SET search_path=public,tap;
 
--- NOTE: the compat.sql test verifies that we've got the full set of rights
 
 SELECT plan(7);
 
+-- NOTE: the compat.sql test verifies that we've got the full set of rights
 -- Sanity-check with grant version
 SELECT is(
   length(_aclitems_all_rights_w_grant())
