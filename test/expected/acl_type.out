@@ -1,0 +1,9 @@
+\set ECHO none
+1..6
+ok 1 - acl() with all no grant rights
+ok 2 - acl() with all grant rights
+ok 3 - Simple cast of test role to aclitem
+ok 4 - Simple cast of test role to aclitem as grantor
+ok 5 - acl() with test role
+ok 6 - acl() with test role grantor
+# TRANSACTION INTENTIONALLY LEFT OPEN!
