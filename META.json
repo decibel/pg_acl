@@ -67,38 +67,29 @@
 
     "X_comment": "Optional. \"prereqs\": Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
     "prereqs": {
-        "X_comment": "Valid keys are configure, build, runtime, or test.",
 
         "build": {
-            "X_comment": "Valid keys are requires, recommends, suggests, or conflicts.",
             "requires": {
-                "PostgreSQL": "9.5.0",
+                "PostgreSQL": "9.5.0"
 
-                "X_end": ""
-            },
+            }
 
-            "X_end": ""
         },
         "runtime": {
             "requires": {
-                "plpgsql": 0,
+                "plpgsql": 0
 
-                "X_end": ""
-            },
+            }
 
-            "X_end": ""
         },
         "test": {
             "requires": {
-                "pgtap": 0,
+                "pgtap": 0
 
-                "X_end": ""
-            },
+            }
 
-            "X_end": ""
-        },
+        }
 
-        "X_end": ""
     },
 
     "X_comment": "Unusual. \"no_index\": Files/directories that should not be indexed. http://pgxn.org/spec/#no_index",
