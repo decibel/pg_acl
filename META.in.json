@@ -33,7 +33,7 @@
 
     "X_comment": "REQUIRED. Specifies extensions contained in this distribution. Each key is the name of an extension. http://pgxn.org/spec/#provides",
     "provides": {
-        "acl": {
+        "pg_acl": {
             "X_comment": "REQUIRED. File containing extension.",
             "file": "sql/acl.sql",
 
