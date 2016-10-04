@@ -11,7 +11,7 @@
     "X_comment": "I've tried to put things in a logical order. Comments welcome at https://github.com/decibel/pgxntool/issues!",
 
     "X_comment": "REQUIRED. Name of distribution.",
-    "name": "pg_acl",
+    "name": "acl",
 
     "X_comment": "REQUIRED. Version of the distribution. http://pgxn.org/spec/#version",
     "version": "0.1.0",
@@ -32,7 +32,7 @@
 
     "X_comment": "REQUIRED. Specifies extensions contained in this distribution. Each key is the name of an extension. http://pgxn.org/spec/#provides",
     "provides": {
-        "pg_acl": {
+        "acl": {
             "X_comment": "REQUIRED. File containing extension.",
             "file": "sql/acl.sql",
 
@@ -67,29 +67,38 @@
 
     "X_comment": "Optional. \"prereqs\": Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
     "prereqs": {
+        "X_comment": "Valid keys are configure, build, runtime, or test.",
 
         "build": {
+            "X_comment": "Valid keys are requires, recommends, suggests, or conflicts.",
             "requires": {
-                "PostgreSQL": "9.5.0"
+                "PostgreSQL": "9.5.0",
 
-            }
+                "X_end": ""
+            },
 
+            "X_end": ""
         },
         "runtime": {
             "requires": {
-                "plpgsql": 0
+                "plpgsql": 0,
 
-            }
+                "X_end": ""
+            },
 
+            "X_end": ""
         },
         "test": {
             "requires": {
-                "pgtap": 0
+                "pgtap": 0,
 
-            }
+                "X_end": ""
+            },
 
-        }
+            "X_end": ""
+        },
 
+        "X_end": ""
     },
 
     "X_comment": "Unusual. \"no_index\": Files/directories that should not be indexed. http://pgxn.org/spec/#no_index",
