@@ -1,68 +1,50 @@
-null :=# Make sure there's no trailing space here!
-space := $(null) $(null)# Make sure there's no trailing space here!
-comma :=,# Make sure there's no trailing space here!
-dquote :="# Make sure there's no trailing space here!
-json_sep := $(dquote)$(comma)$(dquote)
-
-json_parse_cmd	= cat $(1) | $(JSON_SH) | egrep '\[$(dquote)$(strip $(2))$(dquote)\]' | cut $(if $(findstring undefined,$(origin 3)),-f 2,$(3))
-# Need echo to strip out "s
-json_parse	= $(shell echo $(shell $(json_parse_cmd)))
-# Uncomment to debug
-#json_parse	= $(json_parse_cmd)
-
-META_parse	= $(call json_parse,META.json,$(1))
-META_parse2	= $(call json_parse,META.json,$(1),$(2))
-
-# Second argument becomes 'provides","$(1)","version', which gets wrapped in
-# '["..."]' by json_parse_cmd.
-META_extversion	= $(call META_parse,provides$(json_sep)$(1)$(json_sep)version)
-
 PGXNTOOL_DIR := pgxntool
-JSON_SH := $(PGXNTOOL_DIR)/JSON.sh
 
-PGXN		= $(call META_parse,name)
-PGXNVERSION	= $(call META_parse,version)
-
-# Get list of all extensions defined in META.json
-# The second argument first expands to 'provides","[^"]*', which after
-# expansion in json_parse becomes '\["provides","[^"]*"\]' (excluding single
-# quotes in both cases).  The third argument is '-d\" -f4'.
 #
-# This ultimately has the effect of finding every key name under the provides
-# object in META.json.
-EXTENSIONS	= $(call META_parse2,provides$(json_sep)[^$(dquote)]*,-d\$(dquote) -f4)
+# META.json
+#
+PGXNTOOL_distclean += META.json
+META.json: META.in.json $(PGXNTOOL_DIR)/build_meta.sh
+	@$(PGXNTOOL_DIR)/build_meta.sh $< $@
 
-define extension--version_rule
-EXTENSION_$(1)_VERSION		:= $(call META_extversion,$(1))
-EXTENSION_$(1)_VERSION_FILE	= sql/$(1)--$$(EXTENSION_$(1)_VERSION).sql
-EXTENSION_VERSION_FILES		+= $$(EXTENSION_$(1)_VERSION_FILE)
-$$(EXTENSION_$(1)_VERSION_FILE): sql/$(1).sql META.json
-	cp $$< $$@
-endef
-$(foreach ext,$(EXTENSIONS),$(eval $(call extension--version_rule,$(ext)))): META.json
-# TODO: Add support for creating .control files
-#$(foreach ext,$(EXTENSIONS),$(info $(call extension--version_rule,$(ext))))
+#
+# meta.mk
+#
+# Buind meta.mk, which contains info from META.json, and include it
+PGXNTOOL_distclean += meta.mk
+meta.mk: META.json Makefile $(PGXNTOOL_DIR)/base.mk $(PGXNTOOL_DIR)/meta.mk.sh
+	@$(PGXNTOOL_DIR)/meta.mk.sh $< >$@
 
-DATA         = $(filter-out $(wildcard sql/*-*-*.sql),$(wildcard sql/*.sql))
+-include meta.mk
+
+DATA         = $(EXTENSION_VERSION_FILES) $(wildcard sql/*--*--*.sql)
 DOCS         = $(wildcard doc/*.asc)
 ifeq ($(strip $(DOCS)),)
 DOCS =# Set to NUL so PGXS doesn't puke
 endif
-TESTS        = $(wildcard test/sql/*.sql)
-REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
-REGRESS_OPTS = --inputdir=test --load-language=plpgsql
-#
-# Uncoment the MODULES line if you are adding C files
-# to your extention.
-#
-#MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
-PG_CONFIG    = pg_config
+
+PG_CONFIG   ?= pg_config
+TESTDIR		?= test
+TESTOUT		?= $(TESTDIR)
+TEST_SOURCE_FILES	+= $(wildcard $(TESTDIR)/input/*.source)
+TEST_OUT_FILES		 = $(subst input,output,$(TEST_SOURCE_FILES))
+TEST_SQL_FILES		+= $(wildcard $(TESTDIR)/sql/*.sql)
+TEST_RESULT_FILES	 = $(patsubst $(TESTDIR)/sql/%.sql,$(TESTDIR)/expected/%.out,$(TEST_SQL_FILES))
+TEST_FILES	 = $(TEST_SOURCE_FILES) $(TEST_SQL_FILES)
+REGRESS		 = $(sort $(notdir $(subst .source,,$(TEST_FILES:.sql=)))) # Sort is to get unique list
+REGRESS_OPTS = --inputdir=$(TESTDIR) --outputdir=$(TESTOUT) --load-language=plpgsql
+MODULES      = $(patsubst %.c,%,$(wildcard src/*.c))
+ifeq ($(strip $(MODULES)),)
+MODULES =# Set to NUL so PGXS doesn't puke
+endif
 
 EXTRA_CLEAN  = $(wildcard ../$(PGXN)-*.zip) $(EXTENSION_VERSION_FILES)
 
-# Get Postgres version, as well as major (9.4, etc) version. Remove '.' from MAJORVER.
-VERSION 	 = $(shell $(PG_CONFIG) --version | awk '{print $$2}' | sed -e 's/devel$$//')
-MAJORVER 	 = $(shell echo $(VERSION) | cut -d . -f1,2 | tr -d .)
+# Get Postgres version, as well as major (9.4, etc) version.
+# NOTE! In at least some versions, PGXS defines VERSION, so we intentionally don't use that variable
+PGVERSION 	 = $(shell $(PG_CONFIG) --version | awk '{sub("(alpha|beta|devel).*", ""); print $$2}')
+# Multiply by 10 is easiest way to handle version 10+
+MAJORVER 	 = $(shell echo $(PGVERSION) | awk -F'.' '{if ($$1 >= 10) print $$1 * 10; else print $$1 * 10 + $$2}')
 
 # Function for testing a condition
 test		 = $(shell test $(1) $(2) $(3) && echo yes || echo no)
@@ -72,7 +54,7 @@ GE91		 = $(call test, $(MAJORVER), -ge, 91)
 ifeq ($(GE91),yes)
 all: $(EXTENSION_VERSION_FILES)
 
-DATA = $(wildcard sql/*--*.sql)
+#DATA = $(wildcard sql/*--*.sql)
 endif
 
 PGXS := $(shell $(PG_CONFIG) --pgxs)
@@ -82,35 +64,51 @@ DATA += $(wildcard *.control)
 
 # Don't have installcheck bomb on error
 .IGNORE: installcheck
+installcheck: $(TEST_RESULT_FILES) $(TEST_OUT_FILES)
 
 #
-# META.json
+# TEST SUPPORT
 #
-all: META.json
-META.json: META.in.json pgxntool/build_meta.sh
-	pgxntool/build_meta.sh $< $@
-distclean:
-	rm -f META.json
+# These targets are meant to make running tests easier.
 
-#
-# testdeps
-#
+# make test: run any test dependencies, then do a `make install installcheck`.
+# If regressions are found, it will output them.
+.PHONY: test
+test: clean testdeps install installcheck
+	@if [ -r $(TESTOUT)/regression.diffs ]; then cat $(TESTOUT)/regression.diffs; fi
+
+# make results: runs `make test` and copy all result files to expected
+# DO NOT RUN THIS UNLESS YOU'RE CERTAIN ALL YOUR TESTS ARE PASSING!
+.PHONY: results
+results: test
+	rsync -rlpgovP $(TESTOUT)/results/ $(TESTDIR)/expected
+
+# testdeps is a generic dependency target that you can add targets to
 .PHONY: testdeps
 testdeps: pgtap
 
-.PHONY: test
-test: clean testdeps install installcheck
-	@if [ -r regression.diffs ]; then cat regression.diffs; fi
+# These targets ensure all the relevant directories exist
+$(TESTDIR)/sql:
+	@mkdir -p $@
+$(TESTDIR)/expected/:
+	@mkdir -p $@
+$(TEST_RESULT_FILES): $(TESTDIR)/expected/
+	@touch $@
+$(TESTDIR)/output/:
+	@mkdir -p $@
+$(TEST_OUT_FILES): $(TESTDIR)/output/ $(TESTDIR)/expected/ $(TESTDIR)/sql/
+	@touch $@
 
-.PHONY: results
-results: test
-	rsync -rlpgovP results/ test/expected
 
+#
+# TAGGING SUPPORT
+#
 rmtag:
 	git fetch origin # Update our remotes
 	@test -z "$$(git branch --list $(PGXNVERSION))" || git branch -d $(PGXNVERSION)
 	@test -z "$$(git branch --list -r origin/$(PGXNVERSION))" || git push --delete origin $(PGXNVERSION)
 
+# TODO: Don't puke if tag already exists *and is the same*
 tag:
 	@test -z "$$(git status --porcelain)" || (echo 'Untracked changes!'; echo; git status; exit 1)
 	git branch $(PGXNVERSION)
@@ -136,7 +134,8 @@ list:
 	sh -c "$(MAKE) -p no_targets__ | awk -F':' '/^[a-zA-Z0-9][^\$$#\/\\t=]*:([^=]|$$)/ {split(\$$1,A,/ /);for(i in A)print A[i]}' | grep -v '__\$$' | sort"
 
 # To use this, do make print-VARIABLE_NAME
-print-%	: ; $(info $* is $(flavor ${$*}) variable set to [${$*}])@echo -n
+print-%	: ; $(info $* is $(flavor $*) variable set to "$($*)") @true
+
 
 #
 # subtree sync support
@@ -146,12 +145,17 @@ print-%	: ; $(info $* is $(flavor ${$*}) variable set to [${$*}])@echo -n
 .PHONY: pgxn-sync-%
 pgxntool-sync-%:
 	git subtree pull -P pgxntool --squash -m "Pull pgxntool from $($@)" $($@)
-
-pgxntool-sync-release	:= git@github.com:decibel/pgxntool.git release
-pgxntool-sync-local		:= ../pgxntool release
-# NOTE! If you pull anything other than release you're likely to get a bunch of
-# stuff you don't want in your history!
 pgxntool-sync: pgxntool-sync-release
+
+# DANGER! Use these with caution. They may add extra crap to your history and
+# could make resolving merges difficult!
+pgxntool-sync-release	:= git@github.com:decibel/pgxntool.git release
+pgxntool-sync-stable	:= git@github.com:decibel/pgxntool.git stable
+pgxntool-sync-local		:= ../pgxntool release # Not the same as PGXNTOOL_DIR!
+pgxntool-sync-local-stable	:= ../pgxntool stable # Not the same as PGXNTOOL_DIR!
+
+distclean:
+	rm -f $(PGXNTOOL_distclean)
 
 ifndef PGXNTOOL_NO_PGXS_INCLUDE
 include $(PGXS)
