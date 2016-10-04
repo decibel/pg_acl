@@ -7,17 +7,19 @@
     "X_comment": "",
     "X_comment": "Keys marked REQUIRED or Optional are what you'd expect. Keys marked Unusual are keys you don't normally need to use.",
     "X_comment": "The pgxntool Makefile will strip out empty keys to produce a working META.json, so it's fine to leave them here.",
+    "X_comment": "NOTE: Don't get too cute with reformatting this file... some of the processing against it doesn't use a full JSON parser",
     "X_comment": "",
     "X_comment": "I've tried to put things in a logical order. Comments welcome at https://github.com/decibel/pgxntool/issues!",
 
     "X_comment": "REQUIRED. Name of distribution.",
-    "name": "",
+    "X_comment": "Note! Distribution names currently can't contain spaces.",
+    "name": "DISTRIBUTION_NAME",
 
     "X_comment": "REQUIRED. Version of the distribution. http://pgxn.org/spec/#version",
     "version": "0.1.0",
 
     "X_comment": "REQUIRED. Short description of distribution.",
-    "abstract": "",
+    "abstract": "ABSTRACT",
 
     "X_comment": "Optional. \"description\": A longer description of the distribution. http://pgxn.org/spec/#description",
     "description": "",
@@ -32,8 +34,9 @@
     "license": "postgresql",
 
     "X_comment": "REQUIRED. Specifies extensions contained in this distribution. Each key is the name of an extension. http://pgxn.org/spec/#provides",
+    "X_comment": "Note! Extension names currently can't contain spaces.",
     "provides": {
-        "EXTENSION NAME": {
+        "EXTENSION_NAME": {
             "X_comment": "REQUIRED. File containing extension.",
             "file": "sql/file.sql",
 
@@ -41,7 +44,7 @@
             "version": "0.1.0",
 
             "X_comment": "Optional: \"abstract\": Description of the extension.",
-            "abstract": "",
+            "abstract": "ABSTRACT",
 
             "X_comment": "Optional: \"docfile\": filesystem path to document file for extension.",
             "docfile": "",
@@ -66,40 +69,26 @@
         }
     },
 
-    "X_comment": "Optional. \"prereqs\": Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
+    "X_comment": "Optional. 'prereqs': Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
+    "X_comment": "Valid keys for 'prereqs' are configure, build, runtime, or test.",
+    "X_comment": "Valid keys for 'requires' are requires, recommends, suggests, or conflicts.",
     "prereqs": {
-        "X_comment": "Valid keys are configure, build, runtime, or test.",
 
         "build": {
-            "X_comment": "Valid keys are requires, recommends, suggests, or conflicts.",
             "requires": {
-                "PostgreSQL": "9.5.0",
-
-                "X_end": ""
-            },
-
-            "X_end": ""
+                "PostgreSQL": "9.5.0"
+            }
         },
         "runtime": {
             "requires": {
-                "plpgsql": 0,
-
-                "X_end": ""
-            },
-
-            "X_end": ""
+                "plpgsql": 0
+            }
         },
         "test": {
             "requires": {
-                "pgtap": 0,
-
-                "X_end": ""
-            },
-
-            "X_end": ""
-        },
-
-        "X_end": ""
+                "pgtap": 0
+            }
+        }
     },
 
     "X_comment": "Unusual. \"no_index\": Files/directories that should not be indexed. http://pgxn.org/spec/#no_index",
