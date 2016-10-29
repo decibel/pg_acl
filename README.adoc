@@ -25,7 +25,10 @@ There are two main types for ACLs. Each of those has several variations.
 
 === `acl_right`
 
-`acl_right` is an ENUM (enumerator) type that lists all grantable rights in their english form. It comes with two functions for listing all the available values. `_all__acl_right` returns an array of all values and `_all__acl_right_srf` returns a set.
+`acl_right` is an ENUM (enumerator) type that lists all grantable rights in
+their english form. It comes with two functions for listing all the available
+values. `_all__acl_right` returns an array of all values and
+`_all__acl_right_srf` returns a set.
 
 ._all__acl_right_srf()
 ....
