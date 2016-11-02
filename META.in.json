@@ -55,13 +55,13 @@
 
     "X_comment": "Optional. \"resources\": Web resources available for this distribution. http://pgxn.org/spec/#resources",
     "resources": {
-        "homepage": "http://github.com/BlueTreble/test_factory/",
+        "homepage": "http://github.com/decibel/pg_acl/",
         "bugtracker": {
-            "web": "http://github.com/BlueTreble/test_factory/issues"
+            "web": "http://github.com/decibel/pg_acl/issues"
         },
         "repository": {
-            "url": "git://github.com/BlueTreble/test_factory.git",
-            "web": "http://github.com/BlueTreble/test_factory/",
+            "url": "git://github.com/decibel/pg_acl.git",
+            "web": "http://github.com/decibel/pg_acl/",
             "type": "git"
         }
     },
@@ -69,11 +69,12 @@
     "X_comment": "Optional. 'prereqs': Prerequisits for the distribution. http://pgxn.org/spec/#prereqs",
     "X_comment": "Valid keys for 'prereqs' are configure, build, runtime, or test.",
     "X_comment": "Valid keys for 'requires' are requires, recommends, suggests, or conflicts.",
+    "X_comment": "ORDINALITY was introduced in 9.4",
     "prereqs": {
 
         "build": {
             "requires": {
-                "PostgreSQL": "9.5.0"
+                "PostgreSQL": "9.4.0"
             }
         },
         "runtime": {
