@@ -14,7 +14,7 @@
     "name": "pg_acl",
 
     "X_comment": "REQUIRED. Version of the distribution. http://pgxn.org/spec/#version",
-    "version": "0.1.2",
+    "version": "0.1.3",
 
     "X_comment": "REQUIRED. Short description of distribution.",
     "abstract": "Utilities for handling aclitems.",
@@ -37,7 +37,7 @@
             "file": "build/pg_acl.sql",
 
             "X_comment": "REQUIRED. Version the extension is at.",
-            "version": "0.1.2",
+            "version": "0.1.3",
 
             "X_comment": "Optional: \"abstract\": Description of the extension.",
             "abstract": "Utilities for handling aclitems.",
