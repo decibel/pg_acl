@@ -4,7 +4,7 @@
 
 BEGIN;
 
-\i sql/acl.sql
+\i sql/pg_acl.sql
 
 \echo # TRANSACTION INTENTIONALLY LEFT OPEN!
 

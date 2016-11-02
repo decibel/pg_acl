@@ -1,3 +1,0 @@
-comment = 'Utilities for handling aclitems.'
-default_version = '0.1.1'
-relocatable = false

@@ -16,9 +16,9 @@ I do plan to add casts to and from the ACE type in the future.
 - Install http://pgxnclient.projects.pgfoundry.org/install.html[pgxnclient]
 - `pgxn load pg_acl -d dbname --schema acl` (See http://pgxnclient.projects.pgfoundry.org/usage.html#pgxn-load[pgxn load documentation].)
 
-Alternatively, you can `pgxn install pg_acl` and then `CREATE EXTENSION acl SCHEMA acl;` from within the database.
+Alternatively, you can `pgxn install pg_acl` and then `CREATE EXTENSION pg_acl SCHEMA acl;` from within the database.
 
-Note: you can install acl into any schema you want, but once it's installed you can't move it.
+Note: you can install pg_acl into any schema you want, but once it's installed you can't move it.
 
 == Provided types
 There are two main types for ACLs. Each of those has several variations.

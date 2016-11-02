@@ -1,2 +1,2 @@
 -- Add any test dependency statements here
-CREATE EXTENSION acl;
+CREATE EXTENSION pg_acl;
