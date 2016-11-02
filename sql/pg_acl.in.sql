@@ -209,9 +209,9 @@ $body$;
 
 
 CREATE TYPE acl AS (
-  grantee regrole
+  grantee "regrole"
   , rights acl_right[]
-  , grantor regrole
+  , grantor "regrole"
 );
 
 CREATE OR REPLACE FUNCTION acl(

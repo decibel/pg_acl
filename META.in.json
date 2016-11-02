@@ -35,7 +35,7 @@
     "provides": {
         "pg_acl": {
             "X_comment": "REQUIRED. File containing extension.",
-            "file": "sql/pg_acl.sql",
+            "file": "build/pg_acl.sql",
 
             "X_comment": "REQUIRED. Version the extension is at.",
             "version": "0.1.1",
