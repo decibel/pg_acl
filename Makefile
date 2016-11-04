@@ -15,6 +15,8 @@ EXTRA_CLEAN += $B/pg_acl.sql
 $B/pg_acl.sql: sql/pg_acl.in.sql Makefile
 	(echo @generated@ && cat $< && echo @generated@) | sed -e 's#@generated@#-- GENERATED FILE! DO NOT EDIT! See $<#' > $@
 ifeq ($(LT95),yes)
+	sed --version
+	sed --help
 	sed -i '' -e 's/"regrole"/name/g' $@
 endif
 
