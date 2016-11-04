@@ -10,6 +10,7 @@ SELECT array_to_string(
   ) || '*'
 $body$;
 
+@generated@
 CREATE OR REPLACE FUNCTION _enum_from_array(
   enum_name text
   , enum_values text[]
@@ -65,6 +66,9 @@ $format$CREATE OR REPLACE FUNCTION %1$I(
 ) RETURNS SETOF %2$I LANGUAGE sql IMMUTABLE AS $body$
 SELECT * FROM unnest(%3$I())
 $body$;
+
+@generated@
+
 COMMENT ON FUNCTION %1$I() IS %4$L;
 $format$
     , array_function_name || '_srf'
@@ -99,6 +103,8 @@ SELECT _enum_from_array(
   , $$Rights that an ACL item can have, excluding WITH GRANT OPTION.$$
 );
 
+@generated@
+
 -- Create ENUM that includes WITH GRANT
 SELECT _enum_from_array(
   'acl_right'
@@ -122,6 +128,8 @@ CREATE FUNCTION _all__acl_right_only_grant(
 ) RETURNS acl_right[] LANGUAGE sql IMMUTABLE AS $body$
 SELECT array( SELECT * FROM _all__acl_right_only_grant_srf() )
 $body$;
+
+@generated@
 
 CREATE CAST (acl_right AS acl_right_no_grant) WITH INOUT;
 CREATE CAST (acl_right_no_grant AS acl_right) WITH INOUT;
@@ -196,6 +204,9 @@ SELECT format(
   RETURN out;
 END
 $body$;
+
+@generated@
+
 COMMENT ON FUNCTION _rights_to_enum(
   input text
   , no_grant boolean
@@ -213,6 +224,8 @@ CREATE TYPE acl AS (
   , rights acl_right[]
   , grantor "regrole"
 );
+
+@generated@
 
 CREATE OR REPLACE FUNCTION acl(
   input aclitem
@@ -251,6 +264,8 @@ SELECT array(
   SELECT acl(u) FROM unnest(input) u
 )
 $body$;
+
+@generated@
 
 /* TODO
 #define ACL_ALL_RIGHTS_COLUMN		(ACL_INSERT|ACL_SELECT|ACL_UPDATE|ACL_REFERENCES)
